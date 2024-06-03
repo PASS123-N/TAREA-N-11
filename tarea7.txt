@@ -1,0 +1,116 @@
+--1. Consulta de Departamentos:
+--¿Cuáles son los identificadores y nombres de todos los departamentos existentes en la empresa?
+SELECT IDDepartamento, NombreDepartamento
+FROM Departamento;
+
+--2. Consulta de Proyectos:
+--¿Cuáles son los identificadores y nombres de todos los proyectos existentes en la empresa?
+SELECT IDProyecto, NombreProyecto
+FROM Proyecto;
+
+--3. Consulta de Proyectos por Ubicación:
+--¿Cuáles son los proyectos que se desarrollan en 'CHICAGO'?
+SELECT IDProyecto, NombreProyecto
+FROM Proyecto
+WHERE Ubicacion = 'CHICAGO';
+
+--4. Consulta de Proyectos por Departamento:
+--¿Cuáles son los proyectos que pertenecen al departamento con identificador 2?
+SELECT IDProyecto, NombreProyecto
+FROM Proyecto
+WHERE IDDepartamento = 2;
+
+--5. Consulta de Proyectos y Departamentos:
+--¿Cuáles son los nombres y ubicaciones de los proyectos junto con los nombres de sus departamentos asociados?
+SELECT Proyecto.NombreProyecto, Proyecto.Ubicacion AS UbicacionProyecto, Departamento.NombreDepartamento
+FROM Proyecto
+JOIN Departamento ON Proyecto.IDDepartamento = Departamento.IDDepartamento;
+
+--6. Consulta de Empleados por Proyecto:
+--¿Qué empleados están asignados al proyecto identificado con el número 4, y cuáles son sus nombres?
+SELECT Empleado.IDEmpleado, Empleado.NombreEmpleado
+FROM EmpleadoProyecto
+JOIN Empleado ON EmpleadoProyecto.IDEmpleado = Empleado.IDEmpleado
+WHERE EmpleadoProyecto.IDProyecto = 4;
+
+--7. Consulta de Proyectos por Empleado:
+--¿En qué proyectos está participando el empleado con el identificador 4, y cuáles son los nombres de esos proyectos?
+SELECT Proyecto.IDProyecto, Proyecto.NombreProyecto
+FROM EmpleadoProyecto
+JOIN Proyecto ON EmpleadoProyecto.IDProyecto = Proyecto.IDProyecto
+WHERE EmpleadoProyecto.IDEmpleado = 4;
+
+--8. Consulta de Horas Trabajadas por Proyecto:
+--¿Cuántas horas han trabajado en total los empleados en el proyecto con identificador 2?
+SELECT SUM(HorasTrabajadas) AS TotalHorasTrabajadas
+FROM EmpleadoProyecto
+WHERE IDProyecto = 2;
+
+--9. Consulta de Empleados con Horas Trabajadas:
+--¿Cuáles son los empleados que han trabajado más de 10 horas en el proyecto con identificador 2?
+SELECT Empleado.IDEmpleado, Empleado.NombreEmpleado
+FROM EmpleadoProyecto
+JOIN Empleado ON EmpleadoProyecto.IDEmpleado = Empleado.IDEmpleado
+WHERE EmpleadoProyecto.IDProyecto = 2
+AND EmpleadoProyecto.HorasTrabajadas > 10;
+
+--10. Consulta de Total de Horas por Empleado:
+--¿Cuál es el total de horas trabajadas por cada empleado en todos los proyectos?
+SELECT Empleado.IDEmpleado, Empleado.NombreEmpleado, SUM(EmpleadoProyecto.HorasTrabajadas) AS TotalHorasTrabajadas
+FROM EmpleadoProyecto
+JOIN Empleado ON EmpleadoProyecto.IDEmpleado = Empleado.IDEmpleado
+GROUP BY Empleado.IDEmpleado, Empleado.NombreEmpleado;
+
+--11. Consulta de Empleados con Múltiples Proyectos:
+--¿Cuáles son los empleados que trabajan en más de un proyecto?
+SELECT IDEmpleado, COUNT(DISTINCT IDProyecto) AS ProyectosAsignados
+FROM EmpleadoProyecto
+GROUP BY IDEmpleado
+HAVING ProyectosAsignados > 1;
+
+--12. Consulta de Empleados y Horas Totales:
+--¿Cuáles son los empleados que han trabajado más de 30 horas en total en todos los proyectos?
+SELECT Empleado.IDEmpleado, Empleado.NombreEmpleado, SUM(EmpleadoProyecto.HorasTrabajadas) AS TotalHorasTrabajadas
+FROM EmpleadoProyecto
+JOIN Empleado ON EmpleadoProyecto.IDEmpleado = Empleado.IDEmpleado
+GROUP BY Empleado.IDEmpleado, Empleado.NombreEmpleado
+HAVING TotalHorasTrabajadas > 30;
+
+--13. Consulta de Proyectos y Horas Promedio:
+--¿Cuál es el promedio de horas trabajadas por proyecto?
+SELECT Proyecto.IDProyecto, Proyecto.NombreProyecto, AVG(EmpleadoProyecto.HorasTrabajadas) AS PromedioHorasTrabajadas
+FROM EmpleadoProyecto
+JOIN Proyecto ON EmpleadoProyecto.IDProyecto = Proyecto.IDProyecto
+GROUP BY Proyecto.IDProyecto, Proyecto.NombreProyecto;
+
+--Consultas avanzadas
+--Pregunta 1: Empleados en Proyectos Específicos y con Salario Alto
+--¿Cuáles son los empleados que trabajan en proyectos ubicados en 'CHICAGO' y que tienen un salario (con o sin comisión) superior a 2000?
+SELECT DISTINCT Empleado.IDEmpleado, Empleado.NombreEmpleado
+FROM Empleado
+JOIN EmpleadoProyecto ON Empleado.IDEmpleado = EmpleadoProyecto.IDEmpleado
+JOIN Proyecto ON EmpleadoProyecto.IDProyecto = Proyecto.IDProyecto
+WHERE Proyecto.U
+
+-- Pregunta 2: Empleados con Jefe y en Proyectos Múltiples
+-- ¿Cuáles son los empleados que tienen un jefe, están asignados a más de un proyecto, y han trabajado más de 15 horas en total en todos los proyectos combinados?
+
+SELECT DISTINCT Empleado.IDEmpleado, Empleado.NombreEmpleado
+FROM Empleado
+JOIN EmpleadoProyecto ON Empleado.IDEmpleado = EmpleadoProyecto.IDEmpleado
+WHERE Empleado.IDJefe IS NOT NULL
+GROUP BY Empleado.IDEmpleado
+HAVING COUNT(DISTINCT EmpleadoProyecto.IDProyecto) > 1
+AND SUM(EmpleadoProyecto.HorasTrabajadas) > 15;
+
+-- Pregunta 3: Empleados sin Comisión en Departamentos Específicos
+-- ¿Cuáles son los empleados que no reciben comisión y trabajan en departamentos ubicados en 'DALLAS' o 'NEW YORK'?
+
+SELECT IDEmpleado, NombreEmpleado
+FROM Empleado
+WHERE Comision IS NULL
+AND IDDepartamento IN (
+    SELECT IDDepartamento
+    FROM Departamento
+    WHERE Ubicacion IN ('DALLAS', 'NEW YORK')
+);
